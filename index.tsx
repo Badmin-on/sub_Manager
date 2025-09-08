@@ -1,8 +1,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './src/index.css';
 import App from './App';
 import { LanguageProvider } from './context/LanguageContext';
+import { Toaster } from 'react-hot-toast';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -14,6 +16,7 @@ root.render(
   <React.StrictMode>
     <LanguageProvider>
       <App />
+      <Toaster position="top-right" />
     </LanguageProvider>
   </React.StrictMode>
 );

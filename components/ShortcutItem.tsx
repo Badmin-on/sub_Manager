@@ -1,7 +1,8 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Shortcut } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { Edit, Trash2, ExternalLink, DollarSign, Calendar, AlertCircle } from 'lucide-react';
 
 interface ShortcutItemProps {
   shortcut: Shortcut;
@@ -46,51 +47,108 @@ const ShortcutItem: React.FC<ShortcutItemProps> = ({ shortcut, onDelete, onEdit 
 
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${shortcut.url}&sz=64`;
 
+  const [imageError, setImageError] = useState(false);
+  
   return (
-    <div className="relative group flex flex-col items-center text-center">
-       <div className="absolute top-0 right-0 z-10 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-           <button 
-              onClick={() => onEdit(shortcut)}
-              className="p-1 bg-gray-600 text-white rounded-full focus:opacity-100 focus:outline-none"
-              aria-label={t('shortcutItem.edit', { name: shortcut.name })}
-            >
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
-            </svg>
-            </button>
-           <button 
-              onClick={() => onDelete(shortcut.id)}
-              className="p-1 bg-gray-600 text-white rounded-full focus:opacity-100 focus:outline-none"
-              aria-label={t('shortcutItem.delete', { name: shortcut.name })}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-       </div>
-      <a href={shortcut.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center w-full">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center bg-gray-200 shadow-md transition-all duration-300 ease-in-out transform group-hover:scale-110 ${ringClass}`}>
-          <img 
-            src={faviconUrl} 
-            alt={`${shortcut.name} favicon`} 
-            className="w-full h-full object-cover rounded-full"
-            onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentNode as HTMLDivElement;
-                if (parent) {
-                    const textFallback = document.createElement('span');
-                    textFallback.className = 'text-xl font-bold text-gray-600';
-                    textFallback.textContent = getInitials(shortcut.name);
-                    parent.appendChild(textFallback);
-                }
-            }}
-          />
+    <div className="shortcut-item relative">
+      {/* Action buttons - top right */}
+      <div className="absolute top-2 right-2 z-10 flex space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            onEdit(shortcut);
+          }}
+          className="p-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:bg-gray-50 hover:text-primary-600 transition-colors"
+          aria-label={t('shortcutItem.edit', { name: shortcut.name })}
+        >
+          <Edit size={14} />
+        </button>
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete(shortcut.id);
+          }}
+          className="p-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:bg-red-50 hover:text-red-600 transition-colors"
+          aria-label={t('shortcutItem.delete', { name: shortcut.name })}
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      {/* Payment due indicator */}
+      {dueSoon && (
+        <div className="absolute -top-2 -left-2 z-10">
+          <div className="bg-yellow-400 text-yellow-900 rounded-full p-1.5 shadow-md animate-pulse">
+            <AlertCircle size={16} />
+          </div>
         </div>
-        <span className="mt-2 text-sm font-medium text-gray-800 break-all w-24 truncate">{shortcut.name}</span>
+      )}
+
+      {/* Main content area */}
+      <a 
+        href={shortcut.url} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="block w-full h-full p-4 text-decoration-none"
+      >
+        {/* Icon/Logo section */}
+        <div className="flex justify-center mb-3">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary-50 to-purple-50 shadow-sm transition-all duration-200 group-hover:shadow-md ${dueSoon ? 'ring-2 ring-yellow-400' : ''}`}>
+            {!imageError ? (
+              <img 
+                src={faviconUrl} 
+                alt={`${shortcut.name} favicon`} 
+                className="w-8 h-8 object-cover rounded-lg"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-100 to-purple-100 rounded-lg flex items-center justify-center">
+                <span className="text-sm font-bold text-primary-600">
+                  {getInitials(shortcut.name)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-sm font-semibold text-gray-900 text-center mb-2 line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
+          {shortcut.name}
+        </h3>
+
+        {/* URL preview */}
+        <p className="text-xs text-gray-500 text-center truncate mb-3" title={shortcut.url}>
+          {new URL(shortcut.url).hostname}
+        </p>
+
+        {/* Payment info */}
+        {(shortcut.paymentAmount || shortcut.paymentDate) && (
+          <div className="border-t border-gray-100 pt-3 space-y-1">
+            {shortcut.paymentAmount && (
+              <div className="flex items-center justify-center space-x-1 text-xs text-gray-600">
+                <DollarSign size={12} />
+                <span>${shortcut.paymentAmount}</span>
+                {shortcut.paymentFrequency && (
+                  <span className="text-gray-400">/{shortcut.paymentFrequency}</span>
+                )}
+              </div>
+            )}
+            {shortcut.paymentDate && (
+              <div className={`flex items-center justify-center space-x-1 text-xs ${
+                dueSoon ? 'text-yellow-700 font-medium' : 'text-gray-600'
+              }`}>
+                <Calendar size={12} />
+                <span>{new Date(shortcut.paymentDate + 'T00:00:00').toLocaleDateString()}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* External link indicator */}
+        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <ExternalLink size={14} className="text-gray-400" />
+        </div>
       </a>
-      {dueSoon && <span className="mt-1 text-xs text-yellow-600 font-semibold">{t('shortcutItem.paymentDue')}</span>}
     </div>
   );
 };
