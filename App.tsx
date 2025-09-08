@@ -5,12 +5,15 @@ import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
 import EditShortcutModal from './components/EditShortcutModal';
 import CategoryManagerModal from './components/CategoryManagerModal';
+import SupabaseApp from './SupabaseApp';
 import type { Shortcut, Category } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 import { sampleShortcuts, sampleCategories } from './data/sampleData';
 import toast from 'react-hot-toast';
+import { Cloud, HardDrive, ToggleLeft, ToggleRight } from 'lucide-react';
 
 const App: React.FC = () => {
+  const [useSupabase, setUseSupabase] = useLocalStorage<boolean>('useSupabase', false);
   const [shortcuts, setShortcuts] = useLocalStorage<Shortcut[]>('shortcuts', []);
   const [categories, setCategories] = useLocalStorage<Category[]>('categories', []);
   
@@ -72,8 +75,42 @@ const App: React.FC = () => {
     setShortcuts(prev => [...prev, ...importedShortcuts]);
   };
 
+  // Supabase 모드 렌더링
+  if (useSupabase) {
+    return <SupabaseApp />;
+  }
+
+  // 로컬 스토리지 모드 렌더링
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 모드 스위치 */}
+      <div className="bg-gray-100 border-b border-gray-200 py-2">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <span className="text-sm font-medium text-gray-700">저장 모드:</span>
+            <div className="flex items-center space-x-2">
+              <HardDrive size={16} className="text-gray-600" />
+              <span className="text-sm text-gray-600">로컬</span>
+              <button
+                onClick={() => setUseSupabase(!useSupabase)}
+                className="p-1 hover:bg-gray-200 rounded transition-colors"
+              >
+                {useSupabase ? (
+                  <ToggleRight className="text-blue-500" size={24} />
+                ) : (
+                  <ToggleLeft className="text-gray-400" size={24} />
+                )}
+              </button>
+              <span className="text-sm text-gray-600">클라우드</span>
+              <Cloud size={16} className="text-gray-600" />
+            </div>
+          </div>
+          <div className="text-xs text-gray-500">
+            💡 클라우드 모드: 실시간 동기화 + 인증 기능
+          </div>
+        </div>
+      </div>
+      
       <Header 
         onAddClick={() => setIsAddModalOpen(true)} 
         onManageCategoriesClick={() => setIsCategoryModalOpen(true)}
