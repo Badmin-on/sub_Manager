@@ -1,8 +1,8 @@
 // Supabase 연결 테스트
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://mevtbqtqfaczvwbyrzlx.supabase.co'
-const supabaseAnonKey = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTczNzAzMjgzOCwiZXhwIjoyMDUyNjA4ODM4LCJhdWQiOiJzdXBhYmFzZSIsImlzcyI6InN1cGFiYXNlIn0.APP_Pp2jfOmdT1p1MEfjOLozvWhUOYjbZdR_Lx8hH3U'
+const supabaseUrl = 'https://mpvtbptqfozxwbyeyizx.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdnRicHRxZm96eHdieWV5eml4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTk3NTEsImV4cCI6MjA3MzU5NTc1MX0.RlnBL9tiJl3dQ07NRo0nrMWjD4BwarJhkKlwsGCrrBE'
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 

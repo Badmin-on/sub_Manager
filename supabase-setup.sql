@@ -1,4 +1,5 @@
 -- Supabase 데이터베이스 테이블 생성 스크립트
+-- 프로젝트: mpvtbptqfozxwbyeyizx
 -- 이 SQL을 Supabase 대시보드의 SQL Editor에서 실행하세요
 
 -- 1. Categories 테이블 생성

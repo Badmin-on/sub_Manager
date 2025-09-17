@@ -3,14 +3,14 @@ import { createClient } from '@supabase/supabase-js'
 
 const configs = [
   {
-    name: 'Current Test Config',
-    url: 'https://mevtbqtqfaczvwbyrzlx.supabase.co',
-    key: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTczNzAzMjgzOCwiZXhwIjoyMDUyNjA4ODM4LCJhdWQiOiJzdXBhYmFzZSIsImlzcyI6InN1cGFiYXNlIn0.APP_Pp2jfOmdT1p1MEfjOLozvWhUOYjbZdR_Lx8hH3U'
+    name: 'Updated Project Config',
+    url: 'https://mpvtbptqfozxwbyeyizx.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdnRicHRxZm96eHdieWV5eml4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTk3NTEsImV4cCI6MjA3MzU5NTc1MX0.RlnBL9tiJl3dQ07NRo0nrMWjD4BwarJhkKlwsGCrrBE'
   },
   {
-    name: 'Alternative Config',
-    url: 'https://mpvtbptqfozxwbyeyzix.supabase.co',
-    key: 'YOUR_SUPABASE_ANON_KEY_HERE'
+    name: 'Legacy Config',
+    url: 'https://mevtbqtqfaczvwbyrzlx.supabase.co',
+    key: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTczNzAzMjgzOCwiZXhwIjoyMDUyNjA4ODM4LCJhdWQiOiJzdXBhYmFzZSIsImlzcyI6InN1cGFiYXNlIn0.APP_Pp2jfOmdT1p1MEfjOLozvWhUOYjbZdR_Lx8hH3U'
   }
 ];
 
