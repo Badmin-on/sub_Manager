@@ -50,60 +50,62 @@ const ShortcutItem: React.FC<ShortcutItemProps> = ({ shortcut, onDelete, onEdit 
   const [imageError, setImageError] = useState(false);
   
   return (
-    <div className="shortcut-item relative">
-      {/* Action buttons - top right */}
-      <div className="absolute top-2 right-2 z-10 flex space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            onEdit(shortcut);
-          }}
-          className="p-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:bg-gray-50 hover:text-primary-600 transition-colors"
-          aria-label={t('shortcutItem.edit', { name: shortcut.name })}
-        >
-          <Edit size={14} />
-        </button>
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            onDelete(shortcut.id);
-          }}
-          className="p-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:bg-red-50 hover:text-red-600 transition-colors"
-          aria-label={t('shortcutItem.delete', { name: shortcut.name })}
-        >
-          <Trash2 size={14} />
-        </button>
-      </div>
-
+    <div className="relative bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-105 group w-16">
       {/* Payment due indicator */}
       {dueSoon && (
-        <div className="absolute -top-2 -left-2 z-10">
-          <div className="bg-yellow-400 text-yellow-900 rounded-full p-1.5 shadow-md animate-pulse">
-            <AlertCircle size={16} />
+        <div className="absolute -top-1 -left-1 z-20">
+          <div className="bg-yellow-400 text-yellow-900 rounded-full p-1 shadow-md animate-pulse">
+            <AlertCircle size={10} />
           </div>
         </div>
       )}
 
-      {/* Main content area */}
-      <a 
-        href={shortcut.url} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="block w-full h-full p-4 text-decoration-none"
+      {/* Action buttons - top right */}
+      <div className="absolute top-1 right-1 z-20 flex space-x-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onEdit(shortcut);
+          }}
+          className="p-1 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-600 rounded-md shadow-sm hover:bg-white hover:text-primary-600 transition-all duration-200"
+          aria-label={t('shortcutItem.edit', { name: shortcut.name })}
+        >
+          <Edit size={10} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete(shortcut.id);
+          }}
+          className="p-1 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-600 rounded-md shadow-sm hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+          aria-label={t('shortcutItem.delete', { name: shortcut.name })}
+        >
+          <Trash2 size={10} />
+        </button>
+      </div>
+
+      {/* Main clickable area - vertical compact layout */}
+      <a
+        href={shortcut.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col items-center px-1 py-2 text-decoration-none h-16"
       >
         {/* Icon/Logo section */}
-        <div className="flex justify-center mb-3">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary-50 to-purple-50 shadow-sm transition-all duration-200 group-hover:shadow-md ${dueSoon ? 'ring-2 ring-yellow-400' : ''}`}>
+        <div className="flex-shrink-0 mb-1">
+          <div className={`w-7 h-7 rounded-md flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md ${dueSoon ? 'ring-1 ring-yellow-400/60' : ''}`}>
             {!imageError ? (
-              <img 
-                src={faviconUrl} 
-                alt={`${shortcut.name} favicon`} 
-                className="w-8 h-8 object-cover rounded-lg"
+              <img
+                src={faviconUrl}
+                alt={`${shortcut.name} favicon`}
+                className="w-5 h-5 object-cover rounded-sm"
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-100 to-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-sm font-bold text-primary-600">
+              <div className="w-5 h-5 bg-gradient-to-br from-primary-100 to-purple-100 rounded-sm flex items-center justify-center">
+                <span className="text-xs font-bold text-primary-600">
                   {getInitials(shortcut.name)}
                 </span>
               </div>
@@ -111,42 +113,21 @@ const ShortcutItem: React.FC<ShortcutItemProps> = ({ shortcut, onDelete, onEdit 
           </div>
         </div>
 
-        {/* Title */}
-        <h3 className="text-sm font-semibold text-gray-900 text-center mb-2 line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
-          {shortcut.name}
-        </h3>
+        {/* Content area */}
+        <div className="flex-grow min-w-0 text-center w-full px-0.5">
+          {/* Title */}
+          <h3 className="text-xs font-medium text-gray-900 truncate leading-tight" title={shortcut.name}>
+            {shortcut.name.length > 8 ? shortcut.name.substring(0, 8) + '...' : shortcut.name}
+          </h3>
 
-        {/* URL preview */}
-        <p className="text-xs text-gray-500 text-center truncate mb-3" title={shortcut.url}>
-          {new URL(shortcut.url).hostname}
-        </p>
-
-        {/* Payment info */}
-        {(shortcut.paymentAmount || shortcut.paymentDate) && (
-          <div className="border-t border-gray-100 pt-3 space-y-1">
-            {shortcut.paymentAmount && (
-              <div className="flex items-center justify-center space-x-1 text-xs text-gray-600">
-                <DollarSign size={12} />
-                <span>${shortcut.paymentAmount}</span>
-                {shortcut.paymentFrequency && (
-                  <span className="text-gray-400">/{shortcut.paymentFrequency}</span>
-                )}
-              </div>
-            )}
-            {shortcut.paymentDate && (
-              <div className={`flex items-center justify-center space-x-1 text-xs ${
-                dueSoon ? 'text-yellow-700 font-medium' : 'text-gray-600'
-              }`}>
-                <Calendar size={12} />
-                <span>{new Date(shortcut.paymentDate + 'T00:00:00').toLocaleDateString()}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* External link indicator */}
-        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <ExternalLink size={14} className="text-gray-400" />
+          {/* Payment indicator - only if has payment info */}
+          {(shortcut.paymentAmount || shortcut.paymentDate) && (
+            <div className="flex justify-center mt-0.5">
+              <div className={`w-1 h-1 rounded-full ${
+                dueSoon ? 'bg-yellow-400' : 'bg-green-400'
+              }`} title={shortcut.paymentAmount ? `$${shortcut.paymentAmount}` : '구독 서비스'}></div>
+            </div>
+          )}
         </div>
       </a>
     </div>

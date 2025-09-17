@@ -1,38 +1,133 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
 import EditShortcutModal from './components/EditShortcutModal';
 import CategoryManagerModal from './components/CategoryManagerModal';
-import AuthModal from './components/AuthModal';
 import type { Shortcut, Category } from './types';
 import { useSupabaseAuth, useSupabaseShortcuts, useSupabaseCategories } from './hooks/useSupabase';
-import { LogIn, LogOut, User, Loader2, Cloud, Wifi } from 'lucide-react';
+import { sampleShortcuts, sampleCategories } from './data/sampleData';
+import { Loader2, Wifi, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { supabaseMCP } from './lib/supabase-mcp';
 
 const SupabaseApp: React.FC = () => {
   const { user, loading: authLoading, signIn, signUp, signOut } = useSupabaseAuth();
-  const { 
-    shortcuts, 
-    loading: shortcutsLoading, 
-    addShortcut, 
-    updateShortcut, 
-    deleteShortcut 
+  const {
+    shortcuts,
+    loading: shortcutsLoading,
+    addShortcut,
+    updateShortcut,
+    deleteShortcut
   } = useSupabaseShortcuts(user);
-  const { 
-    categories, 
-    loading: categoriesLoading, 
-    addCategory, 
-    updateCategory, 
-    deleteCategory 
+  const {
+    categories,
+    loading: categoriesLoading,
+    addCategory,
+    updateCategory,
+    deleteCategory
   } = useSupabaseCategories(user);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mcpConnectionStatus, setMcpConnectionStatus] = useState<'connecting' | 'connected' | 'failed'>('connecting');
 
+  // 초기 샘플 데이터 로딩 (한 번만 실행)
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // MCP Supabase 매니저 초기화
+  useEffect(() => {
+    const initializeMCP = async () => {
+      if (user && mcpConnectionStatus === 'connecting') {
+        try {
+          console.log('🚀 MCP Supabase 초기화 시작...');
+          setMcpConnectionStatus('connecting');
+
+          const success = await supabaseMCP.initialize();
+
+          if (success) {
+            setMcpConnectionStatus('connected');
+
+            // 실시간 동기화 설정
+            await supabaseMCP.setupRealtimeSync(
+              (newShortcuts) => {
+                console.log('🔄 실시간 shortcuts 업데이트:', newShortcuts.length);
+              },
+              (newCategories) => {
+                console.log('🔄 실시간 categories 업데이트:', newCategories.length);
+              }
+            );
+
+          } else {
+            setMcpConnectionStatus('failed');
+          }
+
+        } catch (error) {
+          console.error('MCP 초기화 실패:', error);
+          setMcpConnectionStatus('failed');
+        }
+      }
+    };
+
+    // 연결 실패 이벤트 리스너
+    const handleConnectionFailure = (event: CustomEvent) => {
+      if (event.detail.suggestion === 'switch-to-local-mode') {
+        toast.error('Supabase 연결 불가: 로컬 모드로 전환하는 것을 권장합니다.');
+      }
+    };
+
+    window.addEventListener('supabase-connection-failed', handleConnectionFailure as EventListener);
+
+    initializeMCP();
+
+    return () => {
+      window.removeEventListener('supabase-connection-failed', handleConnectionFailure as EventListener);
+    };
+  }, [user, mcpConnectionStatus]);
+
+  useEffect(() => {
+    if (user && !isInitialized && shortcuts.length === 0 && categories.length === 0 && !shortcutsLoading && !categoriesLoading) {
+      const initializeData = async () => {
+        try {
+          console.log('📡 Supabase 초기 데이터 로딩 시작...');
+          setIsInitialized(true);
+
+          // 카테고리 먼저 추가
+          for (const category of sampleCategories) {
+            try {
+              await addCategory(category.name);
+              console.log(`카테고리 추가: ${category.name}`);
+            } catch (error) {
+              console.error(`카테고리 추가 실패: ${category.name}`, error);
+            }
+          }
+
+          // 잠시 대기 후 바로가기 추가
+          setTimeout(async () => {
+            for (const shortcut of sampleShortcuts) {
+              try {
+                await addShortcut(shortcut);
+                console.log(`바로가기 추가: ${shortcut.name}`);
+              } catch (error) {
+                console.error(`바로가기 추가 실패: ${shortcut.name}`, error);
+              }
+            }
+            toast.success('초기 샘플 데이터가 추가되었습니다!');
+          }, 2000);
+
+        } catch (error) {
+          console.error('초기 데이터 로딩 실패:', error);
+          toast.error('초기 데이터 로딩에 실패했습니다. 수동으로 추가해주세요.');
+        }
+      };
+
+      initializeData();
+    }
+  }, [user, isInitialized, shortcuts.length, categories.length, shortcutsLoading, categoriesLoading]);
+
+  // Supabase 핸들러들 (직접 DB 연동)
   const handleAddShortcut = async (newShortcut: Omit<Shortcut, 'id'>) => {
     const success = await addShortcut(newShortcut);
     if (success) {
@@ -65,7 +160,7 @@ const SupabaseApp: React.FC = () => {
 
   const handleImportData = async (importedShortcuts: Shortcut[]) => {
     if (!user) {
-      toast.error('로그인이 필요합니다.');
+      toast.error('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
 
@@ -74,7 +169,7 @@ const SupabaseApp: React.FC = () => {
       const success = await addShortcut(shortcut);
       if (success) successCount++;
     }
-    
+
     toast.success(`${successCount}개의 바로가기를 성공적으로 가져왔습니다!`);
   };
 
@@ -90,130 +185,56 @@ const SupabaseApp: React.FC = () => {
     );
   }
 
-  // 로그인하지 않은 경우
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* 헤더 */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
-              LinkHub Manager 🚀
-            </h1>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="btn-primary flex items-center space-x-2"
-            >
-              <LogIn size={16} />
-              <span>로그인</span>
-            </button>
-          </div>
-        </header>
 
-        {/* 메인 콘텐츠 */}
-        <main className="max-w-4xl mx-auto py-16 px-4 text-center">
-          <div className="bg-white rounded-2xl shadow-lg p-12">
-            <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-8">
-              <Cloud className="text-white" size={48} />
-            </div>
-            
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              실시간 동기화 LinkHub Manager
-            </h2>
-            
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Supabase 기반 실시간 동기화로 모든 기기에서 <br />
-              링크와 구독 정보를 안전하게 관리하세요
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-10">
-              <div className="p-6 bg-blue-50 rounded-xl">
-                <Wifi className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-gray-900 mb-2">실시간 동기화</h3>
-                <p className="text-gray-600 text-sm">
-                  여러 기기에서 실시간으로 데이터가 동기화됩니다
-                </p>
-              </div>
-              
-              <div className="p-6 bg-green-50 rounded-xl">
-                <User className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-gray-900 mb-2">개인 계정</h3>
-                <p className="text-gray-600 text-sm">
-                  안전한 개인 계정으로 데이터를 보호합니다
-                </p>
-              </div>
-              
-              <div className="p-6 bg-purple-50 rounded-xl">
-                <Cloud className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-                <h3 className="font-semibold text-gray-900 mb-2">클라우드 저장</h3>
-                <p className="text-gray-600 text-sm">
-                  Supabase 클라우드에 안전하게 데이터 저장
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="btn-primary text-lg px-8 py-4 flex items-center space-x-3 mx-auto"
-            >
-              <LogIn size={20} />
-              <span>시작하기 - 로그인/회원가입</span>
-            </button>
-
-            <p className="text-sm text-gray-500 mt-6">
-              💡 Supabase 프로젝트가 설정되지 않은 경우 데모 모드로 작동합니다
-            </p>
-          </div>
-        </main>
-
-        {/* 인증 모달 */}
-        <AuthModal
-          isOpen={isAuthModalOpen}
-          onClose={() => setIsAuthModalOpen(false)}
-          onSignIn={signIn}
-          onSignUp={signUp}
-        />
-      </div>
-    );
-  }
-
-  // 로그인된 사용자 화면
+  // 메인 화면 (항상 DB 연동 모드)
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 실시간 상태 표시 */}
-      <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white text-center py-2 text-sm">
-        <div className="flex items-center justify-center space-x-2">
-          <Wifi size={16} className="animate-pulse" />
-          <span>실시간 동기화 활성화됨 | {user.email}</span>
-          <button 
-            onClick={signOut}
-            className="ml-4 hover:bg-white/20 px-2 py-1 rounded text-xs flex items-center space-x-1"
-          >
-            <LogOut size={12} />
-            <span>로그아웃</span>
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* DB 연동 상태 표시 (MCP 통합) */}
+      <div className={`text-white text-center py-3 shadow-sm transition-all duration-300 ${
+        mcpConnectionStatus === 'connected'
+          ? 'bg-gradient-to-r from-green-500 via-blue-500 to-purple-500'
+          : mcpConnectionStatus === 'connecting'
+          ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 animate-pulse'
+          : 'bg-gradient-to-r from-red-500 via-pink-500 to-red-600'
+      }`}>
+        <div className="flex items-center justify-center space-x-3">
+          <div className="flex items-center space-x-2">
+            {mcpConnectionStatus === 'connected' && <Wifi size={18} className="animate-pulse" />}
+            {mcpConnectionStatus === 'connecting' && <Loader2 size={18} className="animate-spin" />}
+            {mcpConnectionStatus === 'failed' && <AlertCircle size={18} />}
+            <span className="font-medium">
+              {mcpConnectionStatus === 'connected' && 'Supabase MCP 실시간 동기화'}
+              {mcpConnectionStatus === 'connecting' && 'MCP 연결 중...'}
+              {mcpConnectionStatus === 'failed' && 'MCP 연결 실패 - 로컬 모드 권장'}
+            </span>
+          </div>
+          <span className="text-white/80">|</span>
+          <span className="text-white/90 font-medium">
+            {user?.email || '자동 로그인 사용자'}
+          </span>
         </div>
       </div>
 
-      <Header 
-        onAddClick={() => setIsAddModalOpen(true)} 
+      <Header
+        onAddClick={() => setIsAddModalOpen(true)}
         onManageCategoriesClick={() => setIsCategoryModalOpen(true)}
         shortcuts={shortcuts}
         onSearch={setSearchQuery}
         onImportData={handleImportData}
       />
-      
+
       <main className="max-w-7xl mx-auto">
-        {shortcutsLoading || categoriesLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
-              <p className="text-gray-600">데이터를 불러오고 있습니다...</p>
+        {(shortcutsLoading || categoriesLoading) ? (
+          <div className="min-h-screen bg-gray-50/50 flex items-center justify-center py-20">
+            <div className="text-center bg-white p-10 rounded-3xl shadow-lg border border-gray-100">
+              <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto mb-6" />
+              <p className="text-gray-600 text-lg font-medium">데이터를 불러오고 있습니다...</p>
+              <p className="text-gray-500 text-sm mt-2">Supabase DB와 실시간 동기화 중입니다</p>
             </div>
           </div>
         ) : (
-          <ShortcutGrid 
-            shortcuts={shortcuts} 
+          <ShortcutGrid
+            shortcuts={shortcuts}
             categories={categories}
             onDelete={handleDeleteShortcut}
             onEdit={(shortcut) => setEditingShortcut(shortcut)}
@@ -238,7 +259,7 @@ const SupabaseApp: React.FC = () => {
         categories={categories}
       />
 
-      <CategoryManagerModal 
+      <CategoryManagerModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
         categories={categories}

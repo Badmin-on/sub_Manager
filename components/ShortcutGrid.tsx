@@ -50,29 +50,34 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({ shortcuts, categories, onDe
 
   if (shortcuts.length === 0) {
       return (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
-              <div className="bg-gradient-to-br from-primary-50 to-purple-50 p-8 rounded-2xl">
-                  <FolderOpen className="mx-auto h-16 w-16 text-primary-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 text-center mb-2">{t('shortcutGrid.noShortcuts')}</h3>
-                  <p className="text-gray-600 text-center mb-6 max-w-sm">{t('shortcutGrid.getStarted')}</p>
-                  <button 
+          <div className="min-h-screen bg-gray-50/50 flex flex-col items-center justify-center py-20 px-4">
+              <div className="bg-white p-12 rounded-3xl shadow-lg border border-gray-100 max-w-lg w-full text-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary-50 to-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <FolderOpen className="h-10 w-10 text-primary-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('shortcutGrid.noShortcuts')}</h3>
+                  <p className="text-gray-600 mb-8 text-lg leading-relaxed">{t('shortcutGrid.getStarted')}</p>
+                  <button
                     onClick={onAddClick}
-                    className="btn-primary flex items-center space-x-2 mx-auto"
+                    className="bg-gradient-to-r from-primary-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-primary-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg flex items-center space-x-3 mx-auto"
                   >
-                    <Plus size={16} />
+                    <Plus size={20} />
                     <span>Add Your First Link</span>
                   </button>
               </div>
           </div>
       )
   }
-  
+
   if (filteredShortcuts.length === 0) {
       return (
-          <div className="text-center py-20">
-              <div className="bg-gray-50 p-8 rounded-2xl max-w-md mx-auto">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No shortcuts found</h3>
-                  <p className="text-gray-600">Try adjusting your search query or add a new shortcut.</p>
+          <div className="min-h-screen bg-gray-50/50 flex items-center justify-center py-20">
+              <div className="bg-white p-10 rounded-3xl shadow-lg border border-gray-100 max-w-md mx-auto text-center">
+                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <FolderOpen className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">No shortcuts found</h3>
+                  <p className="text-gray-600 leading-relaxed">Try adjusting your search query or add a new shortcut.</p>
               </div>
           </div>
       )
@@ -84,15 +89,15 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({ shortcuts, categories, onDe
   ];
   
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="p-2 sm:p-3 lg:p-4 space-y-4 bg-gray-50/50 min-h-screen">
       {searchQuery && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-700">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-4 shadow-sm">
+          <p className="text-sm text-blue-700 font-medium">
             Showing {filteredShortcuts.length} result{filteredShortcuts.length !== 1 ? 's' : ''} for "{searchQuery}"
           </p>
         </div>
       )}
-      
+
       {categoryOrder.map(category => {
         const categoryShortcuts = groupedShortcuts[category.id];
         if (!categoryShortcuts || categoryShortcuts.length === 0) {
@@ -100,22 +105,25 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({ shortcuts, categories, onDe
         }
         return (
           <div key={category.id} className="category-section">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="category-title flex items-center space-x-2">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
                 <span>{category.name}</span>
-                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                <span className="text-sm font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200">
                   {categoryShortcuts.length}
                 </span>
               </h2>
             </div>
-            <div className="shortcut-grid">
+
+            {/* 컴팩트한 그리드 레이아웃 - 더 많은 카드 표시 */}
+            <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-15 2xl:grid-cols-18 gap-0.5">
                 {categoryShortcuts.map(shortcut => (
-                    <ShortcutItem 
-                      key={shortcut.id} 
-                      shortcut={shortcut} 
-                      onDelete={onDelete} 
-                      onEdit={onEdit} 
-                    />
+                    <div key={shortcut.id} className="w-full">
+                      <ShortcutItem
+                        shortcut={shortcut}
+                        onDelete={onDelete}
+                        onEdit={onEdit}
+                      />
+                    </div>
                 ))}
             </div>
           </div>

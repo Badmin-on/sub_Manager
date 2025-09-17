@@ -1,19 +1,19 @@
 module.exports = {
   apps: [{
-    name: 'linkhub-manager',
+    name: 'subscription-manager',
     script: 'npm',
     args: 'run dev',
-    cwd: '/home/user/webapp',
+    cwd: 'C:\\Users\\nebad\\Desktop\\quicklink\\sub_Manager',
     watch: false,
     env: {
       NODE_ENV: 'development',
       HOST: '0.0.0.0',
-      PORT: '3000'
+      PORT: '5173'
     },
     log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    out_file: '/home/user/webapp/logs/out.log',
-    error_file: '/home/user/webapp/logs/error.log',
-    log_file: '/home/user/webapp/logs/combined.log',
+    out_file: 'logs/out.log',
+    error_file: 'logs/error.log',
+    log_file: 'logs/combined.log',
     time: true
   }]
 };

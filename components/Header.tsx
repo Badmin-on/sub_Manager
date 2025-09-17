@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import type { Shortcut } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
-import { Search, Plus, Settings, Download, Upload } from 'lucide-react';
+import { Search, Plus, Settings, Download, Upload, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
@@ -109,6 +109,16 @@ const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, sh
 
   const totalCost = calculateTotalMonthlyCost();
 
+  const clearLocalStorage = () => {
+    if (confirm('로컬 데이터를 모두 삭제하시겠습니까?')) {
+      localStorage.removeItem('shortcuts');
+      localStorage.removeItem('categories');
+      localStorage.removeItem('useSupabase');
+      toast.success('로컬 데이터가 삭제되었습니다. 페이지를 새로고침해주세요.');
+      window.location.reload();
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-10 border-b border-gray-200">
       <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
@@ -152,6 +162,16 @@ const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, sh
                 className="hidden"
               />
             </label>
+
+            {/* Clear data button */}
+            <button
+              onClick={clearLocalStorage}
+              className="btn-danger flex items-center space-x-2"
+              title="Clear local data"
+            >
+              <Trash2 size={16} />
+              <span className="hidden sm:inline">Clear</span>
+            </button>
             
             {/* Categories button */}
             <button

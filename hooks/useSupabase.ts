@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, type Database } from '../lib/supabase';
+import { supabase, type Database, checkSupabaseConnection } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 import type { Shortcut, Category } from '../types';
@@ -40,25 +40,51 @@ export function useSupabaseAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 현재 사용자 가져오기
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      setLoading(false);
-    });
+    // 향상된 인증 방식 - 연결 체크 포함
+    const initializeAuth = async () => {
+      try {
+        if (import.meta.env.DEV) {
+          console.log('🔐 인증 초기화 시작...');
+        }
 
-    // 인증 상태 변화 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
-      setLoading(false);
-      
-      if (event === 'SIGNED_IN') {
-        toast.success('로그인되었습니다!');
-      } else if (event === 'SIGNED_OUT') {
-        toast.success('로그아웃되었습니다.');
+        // 먼저 Supabase 연결 상태 체크
+        const isConnected = await checkSupabaseConnection();
+
+        if (!isConnected) {
+          throw new Error('Supabase 연결 불가');
+        }
+
+        // 고정 사용자 ID 사용 (개인 사용을 위해)
+        const fixedUser = {
+          id: 'fixed-user-12345',
+          email: 'user@quicklink.local',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          role: 'authenticated'
+        } as User;
+
+        setUser(fixedUser);
+        setLoading(false);
+
+        if (import.meta.env.DEV) {
+          console.log('✅ 고정 사용자 인증 및 연결 완료');
+        }
+
+        toast.success('Supabase 연결 성공!');
+
+      } catch (error) {
+        console.error('❌ 인증 또는 연결 실패:', error);
+        setLoading(false);
+        // 인증 실패해도 로컬 모드로 자동 전환할 수 있도록 안내
+        toast.error('Supabase 연결 실패: 로컬 모드로 자동 전환됩니다.');
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    // 약간의 지연 후 실행 (앱 완전 로딩 후)
+    setTimeout(initializeAuth, 1000);
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -117,23 +143,60 @@ export function useSupabaseShortcuts(user: User | null) {
 
     fetchShortcuts();
 
-    // 실시간 구독 설정
-    const channel = supabase
-      .channel('shortcuts_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'shortcuts',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('Shortcuts realtime update:', payload);
-          fetchShortcuts(); // 변경사항 발생시 다시 fetch
-        }
-      )
-      .subscribe();
+    // 실시간 구독 설정 - 연결 안정성 개선
+    let channel: any = null;
+
+    try {
+      channel = supabase
+        .channel(`shortcuts_changes_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'shortcuts',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            if (import.meta.env.DEV) {
+              console.log('📡 Shortcuts realtime update:', payload);
+            }
+
+            // 효율적인 상태 업데이트
+            if (payload.eventType === 'INSERT' && payload.new) {
+              const newShortcut = mapDbShortcutToAppShortcut(payload.new as any);
+              setShortcuts(prev => [newShortcut, ...prev]);
+              toast.success('바로가기가 추가되었습니다!');
+            } else if (payload.eventType === 'UPDATE' && payload.new) {
+              const updatedShortcut = mapDbShortcutToAppShortcut(payload.new as any);
+              setShortcuts(prev => prev.map(s => s.id === updatedShortcut.id ? updatedShortcut : s));
+              toast.success('바로가기가 업데이트되었습니다!');
+            } else if (payload.eventType === 'DELETE' && payload.old) {
+              setShortcuts(prev => prev.filter(s => s.id !== payload.old.id));
+              toast.success('바로가기가 삭제되었습니다!');
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (import.meta.env.DEV) {
+            console.log('📡 Shortcuts subscription status:', status);
+          }
+          if (status === 'SUBSCRIBED') {
+            if (import.meta.env.DEV) {
+              console.log('✅ Shortcuts realtime subscription active');
+            }
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('❌ Shortcuts realtime subscription error');
+            toast.error('실시간 동기화 오류: 로컬 모드를 사용하세요.');
+            // 오류 시 데이터 다시 불러오기
+            fetchShortcuts();
+          }
+        });
+    } catch (error) {
+      console.error('❌ 실시간 구독 설정 실패:', error);
+      // 실시간 구독 실패해도 기본 기능은 작동하도록
+      toast.error('실시간 동기화 설정 실패: 로컬 모드를 사용하세요.');
+    }
 
     return () => {
       supabase.removeChannel(channel);
@@ -155,8 +218,14 @@ export function useSupabaseShortcuts(user: User | null) {
       const mappedShortcuts = data.map(mapDbShortcutToAppShortcut);
       setShortcuts(mappedShortcuts);
     } catch (error) {
-      console.error('Error fetching shortcuts:', error);
-      toast.error('바로가기를 불러오는 중 오류가 발생했습니다.');
+      console.error('❌ 바로가기 데이터 로딩 실패:', error);
+
+      // 네트워크 오류인 경우 로컬 모드 제안
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        toast.error('네트워크 연결 오류: 로컬 모드를 사용하세요.');
+      } else {
+        toast.error('바로가기를 불러오는 중 오류가 발생했습니다.');
+      }
     } finally {
       setLoading(false);
     }
@@ -253,23 +322,52 @@ export function useSupabaseCategories(user: User | null) {
 
     fetchCategories();
 
-    // 실시간 구독 설정
-    const channel = supabase
-      .channel('categories_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'categories',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('Categories realtime update:', payload);
-          fetchCategories(); // 변경사항 발생시 다시 fetch
-        }
-      )
-      .subscribe();
+    // 실시간 구독 설정 - 연결 안정성 개선
+    let channel: any = null;
+
+    try {
+      channel = supabase
+        .channel(`categories_changes_${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'categories',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('Categories realtime update:', payload);
+
+            // 효율적인 상태 업데이트
+            if (payload.eventType === 'INSERT' && payload.new) {
+              const newCategory = mapDbCategoryToAppCategory(payload.new as any);
+              setCategories(prev => [...prev, newCategory]);
+              toast.success('카테고리가 추가되었습니다!');
+            } else if (payload.eventType === 'UPDATE' && payload.new) {
+              const updatedCategory = mapDbCategoryToAppCategory(payload.new as any);
+              setCategories(prev => prev.map(c => c.id === updatedCategory.id ? updatedCategory : c));
+              toast.success('카테고리가 업데이트되었습니다!');
+            } else if (payload.eventType === 'DELETE' && payload.old) {
+              setCategories(prev => prev.filter(c => c.id !== payload.old.id));
+              toast.success('카테고리가 삭제되었습니다!');
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Categories subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Categories realtime subscription active');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('Categories realtime subscription error');
+            // 오류 시 데이터 다시 불러오기
+            fetchCategories();
+          }
+        });
+    } catch (error) {
+      console.error('실시간 구독 설정 실패:', error);
+      // 실시간 구독 실패해도 기본 기능은 작동하도록
+    }
 
     return () => {
       supabase.removeChannel(channel);
@@ -291,8 +389,14 @@ export function useSupabaseCategories(user: User | null) {
       const mappedCategories = data.map(mapDbCategoryToAppCategory);
       setCategories(mappedCategories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast.error('카테고리를 불러오는 중 오류가 발생했습니다.');
+      console.error('❌ 카테고리 데이터 로딩 실패:', error);
+
+      // 네트워크 오류인 경우 로컬 모드 제안
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        toast.error('네트워크 연결 오류: 로컬 모드를 사용하세요.');
+      } else {
+        toast.error('카테고리를 불러오는 중 오류가 발생했습니다.');
+      }
     } finally {
       setLoading(false);
     }
