@@ -1,23 +1,23 @@
 # Supabase 설정 가이드
 
-## 새로운 프로젝트 설정
+## 현재 연결된 프로젝트 정보
 
-제공된 PostgreSQL 연결 문자열에 기반한 설정:
-```
-postgresql://postgres:[YOUR-PASSWORD]@db.mpvtbptqfozxwbyeyzix.supabase.co:5432/postgres
-```
+올바른 Supabase 프로젝트:
+- **URL**: https://mevtbqtqfaczvwbyrzlx.supabase.co
+- **Project ID**: mevtbqtqfaczvwbyrzlx
 
-## 필수 환경 변수 설정
+## 필수 환경 변수 설정 (자동 완료됨)
 
-`.env.local` 파일을 업데이트하세요:
+`.env.local` 파일이 올바른 정보로 자동 생성되었습니다:
 
 ```env
-# Supabase Configuration - Updated
-SUPABASE_URL=https://mpvtbptqfozxwbyeyzix.supabase.co
-SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY_HERE
+# Supabase Configuration - 올바른 프로젝트 정보
+VITE_SUPABASE_URL=https://mevtbqtqfaczvwbyrzlx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
-# Database Connection (PostgreSQL)
-SUPABASE_DB_PASSWORD=YOUR_DATABASE_PASSWORD_HERE
+# Legacy support
+SUPABASE_URL=https://mevtbqtqfaczvwbyrzlx.supabase.co
+SUPABASE_ANON_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 ```
 
 ## 개선된 기능들

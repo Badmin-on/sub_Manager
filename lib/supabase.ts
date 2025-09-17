@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-// 환경변수 체크 및 안전한 기본값 설정 - 업데이트된 프로젝트
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://mpvtbptqfozxwbyeyzix.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_HERE'
+// 환경변수 체크 및 안전한 기본값 설정 - 올바른 Supabase 프로젝트 정보
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://mevtbqtqfaczvwbyrzlx.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTczNzAzMjgzOCwiZXhwIjoyMDUyNjA4ODM4LCJhdWQiOiJzdXBhYmFzZSIsImlzcyI6InN1cGFiYXNlIn0.APP_Pp2jfOmdT1p1MEfjOLozvWhUOYjbZdR_Lx8hH3U'
 
 // 연결 가능성 체크 (개발 환경에서만)
 if (import.meta.env.DEV) {

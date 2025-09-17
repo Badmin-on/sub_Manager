@@ -15,8 +15,8 @@ import { Cloud, HardDrive, ToggleLeft, ToggleRight } from 'lucide-react';
 const App: React.FC = () => {
   const [useSupabase, setUseSupabase] = useLocalStorage<boolean>('useSupabase', false);
 
-  // 강제 로컬 모드 (디버깅용) - Supabase 키 설정 완료로 비활성화
-  const forceLocalMode = false;
+  // 강제 로컬 모드 (Supabase 연결 문제로 인해 임시 활성화)
+  const forceLocalMode = true; // Supabase 연결 문제 해결 시 false로 변경
 
   // MCP 연결 실패 시 자동 로컬 모드 전환
   useEffect(() => {
@@ -39,14 +39,16 @@ const App: React.FC = () => {
 
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // 디버그 로그
-  console.log('🔍 App 상태:', {
-    useSupabase,
-    shortcutsCount: shortcuts.length,
-    categoriesCount: categories.length,
-    isInitialized,
-    shortcuts: shortcuts.slice(0, 3) // 처음 3개만 출력
-  });
+  // 디버그 로그 (개발 모드에서만)
+  if (import.meta.env.DEV) {
+    console.log('🔍 App 상태:', {
+      useSupabase,
+      shortcutsCount: shortcuts.length,
+      categoriesCount: categories.length,
+      isInitialized,
+      shortcuts: shortcuts.slice(0, 3) // 처음 3개만 출력
+    });
+  }
 
   // Initialize with sample data if no data exists (LOCAL MODE ONLY)
   useEffect(() => {
