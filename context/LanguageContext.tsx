@@ -26,13 +26,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const fetchTranslations = async () => {
       setIsLoading(true);
       try {
-        const currentLangResponse = await fetch(`./locales/${locale}.json`);
+        const currentLangResponse = await fetch(`/locales/${locale}.json`);
         if (!currentLangResponse.ok) throw new Error(`Failed to fetch ${locale}.json`);
         const currentLangData = await currentLangResponse.json();
         setTranslations(currentLangData);
 
         if (locale !== 'en') {
-          const fallbackLangResponse = await fetch(`./locales/en.json`);
+          const fallbackLangResponse = await fetch(`/locales/en.json`);
           if (!fallbackLangResponse.ok) throw new Error('Failed to fetch en.json');
           const fallbackLangData = await fallbackLangResponse.json();
           setFallbackTranslations(fallbackLangData);

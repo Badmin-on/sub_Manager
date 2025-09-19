@@ -1,15 +1,21 @@
-
 {
   "header": {
     "title": "내 바로가기",
     "totalThisMonth": "이번 달 총액",
     "manageCategories": "카테고리 관리",
-    "addSite": "사이트 추가"
+    "addSite": "사이트 추가",
+    "signIn": "Google 계정으로 로그인",
+    "signOut": "로그아웃"
   },
   "shortcutGrid": {
     "noShortcuts": "바로가기가 아직 없습니다",
     "getStarted": "새 사이트를 추가하여 시작하세요.",
-    "uncategorized": "미분류"
+    "uncategorized": "미분류",
+    "signInPrompt": "로그인 해주세요",
+    "signInToSync": "Google 계정으로 로그인하여 바로가기를 동기화하세요.",
+    "loading": "바로가기를 불러오는 중...",
+    "localModeTitle": "시작할 준비가 되셨나요?",
+    "localModeMessage": "바로가기를 추가하여 시작하세요. 데이터는 이 기기에 로컬로 저장됩니다."
   },
   "shortcutItem": {
     "edit": "{name} 수정",

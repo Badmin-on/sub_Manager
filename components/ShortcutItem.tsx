@@ -1,8 +1,7 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { Shortcut } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { Edit, Trash2, ExternalLink, DollarSign, Calendar, AlertCircle } from 'lucide-react';
 
 interface ShortcutItemProps {
   shortcut: Shortcut;
@@ -47,89 +46,51 @@ const ShortcutItem: React.FC<ShortcutItemProps> = ({ shortcut, onDelete, onEdit 
 
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${shortcut.url}&sz=64`;
 
-  const [imageError, setImageError] = useState(false);
-  
   return (
-    <div className="relative bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-105 group w-16">
-      {/* Payment due indicator */}
-      {dueSoon && (
-        <div className="absolute -top-1 -left-1 z-20">
-          <div className="bg-yellow-400 text-yellow-900 rounded-full p-1 shadow-md animate-pulse">
-            <AlertCircle size={10} />
-          </div>
+    <div className="relative group flex flex-col items-center text-center">
+       <div className="absolute top-0 right-0 z-10 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+           <button 
+              onClick={() => onEdit(shortcut)}
+              className="p-1 bg-gray-600 text-white rounded-full focus:opacity-100 focus:outline-none"
+              aria-label={t('shortcutItem.edit', { name: shortcut.name })}
+            >
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+            </svg>
+            </button>
+           <button 
+              onClick={() => onDelete(shortcut.id)}
+              className="p-1 bg-gray-600 text-white rounded-full focus:opacity-100 focus:outline-none"
+              aria-label={t('shortcutItem.delete', { name: shortcut.name })}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+       </div>
+      <a href={shortcut.url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center w-full">
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center bg-gray-200 shadow-md transition-all duration-300 ease-in-out transform group-hover:scale-110 ${ringClass}`}>
+          <img 
+            src={faviconUrl} 
+            alt={`${shortcut.name} favicon`} 
+            className="w-full h-full object-cover rounded-full"
+            onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentNode as HTMLDivElement;
+                if (parent) {
+                    const textFallback = document.createElement('span');
+                    textFallback.className = 'text-xl font-bold text-gray-600';
+                    textFallback.textContent = getInitials(shortcut.name);
+                    parent.appendChild(textFallback);
+                }
+            }}
+          />
         </div>
-      )}
-
-      {/* Action buttons - top right */}
-      <div className="absolute top-1 right-1 z-20 flex space-x-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onEdit(shortcut);
-          }}
-          className="p-1 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-600 rounded-md shadow-sm hover:bg-white hover:text-primary-600 transition-all duration-200"
-          aria-label={t('shortcutItem.edit', { name: shortcut.name })}
-        >
-          <Edit size={10} />
-        </button>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDelete(shortcut.id);
-          }}
-          className="p-1 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-600 rounded-md shadow-sm hover:bg-red-50 hover:text-red-600 transition-all duration-200"
-          aria-label={t('shortcutItem.delete', { name: shortcut.name })}
-        >
-          <Trash2 size={10} />
-        </button>
-      </div>
-
-      {/* Main clickable area - vertical compact layout */}
-      <a
-        href={shortcut.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex flex-col items-center px-1 py-2 text-decoration-none h-16"
-      >
-        {/* Icon/Logo section */}
-        <div className="flex-shrink-0 mb-1">
-          <div className={`w-7 h-7 rounded-md flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md ${dueSoon ? 'ring-1 ring-yellow-400/60' : ''}`}>
-            {!imageError ? (
-              <img
-                src={faviconUrl}
-                alt={`${shortcut.name} favicon`}
-                className="w-5 h-5 object-cover rounded-sm"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <div className="w-5 h-5 bg-gradient-to-br from-primary-100 to-purple-100 rounded-sm flex items-center justify-center">
-                <span className="text-xs font-bold text-primary-600">
-                  {getInitials(shortcut.name)}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Content area */}
-        <div className="flex-grow min-w-0 text-center w-full px-0.5">
-          {/* Title */}
-          <h3 className="text-xs font-medium text-gray-900 truncate leading-tight" title={shortcut.name}>
-            {shortcut.name.length > 8 ? shortcut.name.substring(0, 8) + '...' : shortcut.name}
-          </h3>
-
-          {/* Payment indicator - only if has payment info */}
-          {(shortcut.paymentAmount || shortcut.paymentDate) && (
-            <div className="flex justify-center mt-0.5">
-              <div className={`w-1 h-1 rounded-full ${
-                dueSoon ? 'bg-yellow-400' : 'bg-green-400'
-              }`} title={shortcut.paymentAmount ? `$${shortcut.paymentAmount}` : '구독 서비스'}></div>
-            </div>
-          )}
-        </div>
+        <span className="mt-2 text-sm font-medium text-gray-800 break-all w-24 truncate">{shortcut.name}</span>
       </a>
+      {dueSoon && <span className="mt-1 text-xs text-yellow-600 font-semibold">{t('shortcutItem.paymentDue')}</span>}
     </div>
   );
 };

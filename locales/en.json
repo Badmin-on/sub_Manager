@@ -1,15 +1,21 @@
-
 {
   "header": {
     "title": "My Shortcuts",
     "totalThisMonth": "Total This Month",
     "manageCategories": "Manage Categories",
-    "addSite": "Add Site"
+    "addSite": "Add Site",
+    "signIn": "Sign in with Google",
+    "signOut": "Sign Out"
   },
   "shortcutGrid": {
     "noShortcuts": "No shortcuts yet",
     "getStarted": "Get started by adding a new site.",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "signInPrompt": "Please sign in",
+    "signInToSync": "Sign in with Google to sync your shortcuts.",
+    "loading": "Loading your shortcuts...",
+    "localModeTitle": "Ready to get started?",
+    "localModeMessage": "Add a shortcut to begin. Your data is saved locally on this device."
   },
   "shortcutItem": {
     "edit": "Edit {name}",

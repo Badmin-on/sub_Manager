@@ -1,5 +1,10 @@
 {
   "name": "Subscription Shortcut Manager",
   "description": "A web application to manage your website shortcuts and track upcoming subscription payment dates with visual reminders.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "env": [
+    "API_KEY",
+    "CLIENT_ID",
+    "SPREADSHEET_ID"
+  ]
 }
