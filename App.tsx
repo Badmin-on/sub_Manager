@@ -4,6 +4,7 @@ import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
 import EditShortcutModal from './components/EditShortcutModal';
 import CategoryManagerModal from './components/CategoryManagerModal';
+import ConfigurationModal from './components/ConfigurationModal';
 import type { Shortcut, Category } from './types';
 import useGoogleSheets from './hooks/useGoogleDrive';
 
@@ -17,11 +18,14 @@ const App: React.FC = () => {
     isSignedIn, 
     signIn, 
     signOut,
-    isConfigured
+    isConfigured,
+    config,
+    setConfig
   } = useGoogleSheets();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null);
 
   const canManageData = isSignedIn || !isConfigured;
@@ -70,6 +74,8 @@ const App: React.FC = () => {
         onSignIn={signIn}
         onSignOut={signOut}
         canManageData={canManageData}
+        isConfigured={isConfigured}
+        onConfigureClick={() => setIsConfigModalOpen(true)}
       />
       <main className="max-w-7xl mx-auto">
         <ShortcutGrid 
@@ -102,6 +108,13 @@ const App: React.FC = () => {
         onAddCategory={handleAddCategory}
         onUpdateCategory={handleUpdateCategory}
         onDeleteCategory={handleDeleteCategory}
+      />
+      <ConfigurationModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        onSave={(newConfig) => setConfig(newConfig)}
+        onDisconnect={() => setConfig(null)}
+        initialConfig={config}
       />
     </div>
   );

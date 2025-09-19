@@ -2,6 +2,7 @@ import React from 'react';
 import type { Shortcut } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import SyncStatus from './SyncStatus';
 
 interface HeaderProps {
   onAddClick: () => void;
@@ -11,9 +12,11 @@ interface HeaderProps {
   onSignIn: () => void;
   onSignOut: () => void;
   canManageData: boolean;
+  isConfigured: boolean;
+  onConfigureClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, shortcuts, isSignedIn, onSignIn, onSignOut, canManageData }) => {
+const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, shortcuts, isSignedIn, onSignIn, onSignOut, canManageData, isConfigured, onConfigureClick }) => {
   const { t } = useLanguage();
 
   const calculateTotalMonthlyCost = () => {
@@ -60,10 +63,11 @@ const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, sh
                     </p>
                 </div>
             )}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
                 <LanguageSwitcher />
-                {canManageData ? (
-                  <>
+
+                {canManageData && (
+                  <div className="flex items-center space-x-2">
                     <button
                         onClick={onManageCategoriesClick}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -79,24 +83,18 @@ const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, sh
                         </svg>
                         {t('header.addSite')}
                     </button>
-                    {isSignedIn && (
-                         <button
-                            onClick={onSignOut}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          >
-                            {t('header.signOut')}
-                        </button>
-                    )}
-                  </>
-                ) : (
-                  <button
-                    onClick={onSignIn}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.933 10.152H12.2v4.44h5.454c-.234 1.44-1.63 3.69-5.454 3.69-3.28 0-5.95-2.71-5.95-6.04s2.67-6.04 5.95-6.04c1.86 0 3.12.78 3.82 1.45l3.53-3.35C17.65.952 15.22 0 12.2 0 5.48 0 0 5.42 0 12.1s5.48 12.1 12.2 12.1c6.94 0 11.72-4.83 11.72-11.85 0-.7-.06-1.33-.187-1.9z"/></svg>
-                    {t('header.signIn')}
-                  </button>
+                  </div>
                 )}
+                
+                {canManageData && <div className="w-px h-6 bg-gray-200"></div>}
+
+                <SyncStatus
+                  isConfigured={isConfigured}
+                  isSignedIn={isSignedIn}
+                  onSignIn={onSignIn}
+                  onSignOut={onSignOut}
+                  onConfigureClick={onConfigureClick}
+                />
             </div>
         </div>
       </div>
