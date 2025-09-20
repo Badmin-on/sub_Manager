@@ -14,9 +14,11 @@ interface HeaderProps {
   canManageData: boolean;
   isConfigured: boolean;
   onConfigureClick: () => void;
+  storageMode: 'local' | 'firebase' | 'google-sheets';
+  onStorageModeClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, shortcuts, isSignedIn, onSignIn, onSignOut, canManageData, isConfigured, onConfigureClick }) => {
+const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, shortcuts, isSignedIn, onSignIn, onSignOut, canManageData, isConfigured, onConfigureClick, storageMode, onStorageModeClick }) => {
   const { t } = useLanguage();
 
   const calculateTotalMonthlyCost = () => {
@@ -94,6 +96,8 @@ const Header: React.FC<HeaderProps> = ({ onAddClick, onManageCategoriesClick, sh
                   onSignIn={onSignIn}
                   onSignOut={onSignOut}
                   onConfigureClick={onConfigureClick}
+                  storageMode={storageMode}
+                  onStorageModeClick={onStorageModeClick}
                 />
             </div>
         </div>
