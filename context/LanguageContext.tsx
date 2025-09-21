@@ -26,9 +26,17 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const fetchTranslations = async () => {
       setIsLoading(true);
       try {
+        console.log(`Loading translations for locale: ${locale}`);
+        
         const currentLangResponse = await fetch(`/locales/${locale}.json`);
-        if (!currentLangResponse.ok) throw new Error(`Failed to fetch ${locale}.json`);
+        console.log(`Response status for ${locale}.json:`, currentLangResponse.status);
+        
+        if (!currentLangResponse.ok) {
+          throw new Error(`Failed to fetch ${locale}.json: ${currentLangResponse.status}`);
+        }
+        
         const currentLangData = await currentLangResponse.json();
+        console.log(`Loaded ${locale} translations:`, currentLangData);
         setTranslations(currentLangData);
 
         if (locale !== 'en') {
@@ -41,7 +49,16 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       } catch (error) {
         console.error("Failed to load translation files:", error);
-        setTranslations({});
+        // Set fallback translations for development
+        const fallbackTranslations = {
+          header: {
+            title: "내 바로가기",
+            totalThisMonth: "이번 달 총액",
+            manageCategories: "카테고리 관리",
+            addSite: "사이트 추가"
+          }
+        };
+        setTranslations(fallbackTranslations);
         setFallbackTranslations({});
       } finally {
         setIsLoading(false);
@@ -53,7 +70,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const t = useCallback((key: string, replacements?: { [key: string]: string }): string => {
     if (isLoading) {
-      return '';
+      return key; // Show key instead of empty string while loading
     }
 
     let translation = getNestedValue(translations, key);
@@ -64,7 +81,21 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     if (translation === undefined) {
       console.warn(`Translation key not found: ${key}`);
-      return key;
+      // Return a meaningful fallback based on the key
+      const keyParts = key.split('.');
+      const lastPart = keyParts[keyParts.length - 1];
+      
+      // Provide Korean fallbacks for common keys
+      const koreanFallbacks: { [key: string]: string } = {
+        'title': '내 바로가기',
+        'manageCategories': '카테고리 관리',
+        'addSite': '사이트 추가',
+        'signIn': '로그인',
+        'signOut': '로그아웃',
+        'totalThisMonth': '이번 달 총액'
+      };
+      
+      return koreanFallbacks[lastPart] || key;
     }
 
     let strResult = String(translation);
@@ -85,7 +116,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }), [locale, setLocale, t]);
 
   if (isLoading) {
-    return null; // Don't render children until translations are loaded
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">번역 파일 로딩 중...</p>
+        </div>
+      </div>
+    ); // Show loading spinner while translations are being loaded
   }
 
   return (

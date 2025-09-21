@@ -13,8 +13,19 @@ export default defineConfig(({ mode }) => {
           'localhost',
           '127.0.0.1',
           '.e2b.dev',
+          '.vercel.app',
           '*'
         ]
+      },
+      build: {
+        outDir: 'dist',
+        assetsDir: 'assets',
+        sourcemap: false,
+        rollupOptions: {
+          output: {
+            manualChunks: undefined,
+          }
+        }
       },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
