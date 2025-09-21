@@ -1,8 +1,20 @@
 {
-  "rewrites": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "routes": [
     {
-      "source": "/((?!api|_next/static|_next/image|favicon.ico|locales|assets).*)",
-      "destination": "/index.html"
+      "src": "/locales/(.+)",
+      "dest": "/locales/$1"
+    },
+    {
+      "src": "/assets/(.+)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
@@ -10,8 +22,12 @@
       "source": "/locales/(.*)",
       "headers": [
         {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        },
+        {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }
