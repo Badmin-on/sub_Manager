@@ -1,32 +1,54 @@
-# 구독 서비스 바로가기 매니저
+# Firebase 구독 서비스 관리자
 
-웹사이트와 구독 서비스들을 효율적으로 관리할 수 있는 React 애플리케이션입니다.
+Firebase 실시간 데이터베이스를 사용하여 구독 서비스들을 효율적으로 관리하는 React 애플리케이션입니다.
 
 ## 주요 기능
 
 - 🌐 **웹사이트 바로가기 관리**: 자주 사용하는 웹사이트들을 카테고리별로 정리
-- 💰 **구독 서비스 추적**: 결제일과 금액을 관리하여 월별 비용 추적
-- 🏪 **다중 저장소 지원**: 로컬 저장소, Firebase, Google Sheets 중 선택 가능
+- 💰 **구독 서비스 추적**: 결제일과 금액을 관리하여 월별 비용 추적  
+- 🔄 **실시간 동기화**: Firebase를 통한 모든 기기 간 실시간 데이터 동기화
+- 🔐 **Google 인증**: 안전한 Google 계정 로그인
 - 🌍 **다국어 지원**: 한국어, 영어 지원
 - 📱 **반응형 디자인**: 모바일과 데스크톱 환경 모두 지원
 
-## 로컬 실행
+## Firebase 설정
 
-**필요 조건:** Node.js
+### 1. Firebase 프로젝트 생성
+1. [Firebase Console](https://console.firebase.google.com/)에서 새 프로젝트 생성
+2. **Authentication** > **Sign-in method** > **Google** 활성화
+3. **Realtime Database** 생성 및 활성화
+4. **웹앱** 등록하고 설정 정보 복사
+
+### 2. 보안 규칙 설정
+Realtime Database 규칙을 다음과 같이 설정하세요:
+```json
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
+```
+
+## 로컬 개발
+
+**필요 조건:** Node.js, Firebase 프로젝트
 
 1. **의존성 설치:**
    ```bash
    npm install
    ```
 
-2. **환경 변수 설정 (선택사항):**
-   
-   Firebase나 다른 서비스를 사용하려면 `.env.local` 파일을 생성하세요:
+2. **환경 변수 설정:**
    ```bash
    cp .env.example .env.local
    ```
    
-   **주의**: 환경변수 없이도 앱이 정상 작동합니다 (로컬 저장소 사용)
+   `.env.local` 파일에 Firebase 설정 정보를 입력하세요.
 
 3. **개발 서버 실행:**
    ```bash
@@ -37,41 +59,52 @@
 
 ## Vercel 배포
 
-이 앱은 Vercel에 최적화되어 있습니다:
-
-### 간편 배포
+### 자동 배포 설정
 1. GitHub 저장소를 Vercel에 연결
-2. 자동 배포 (환경변수 설정 없이도 작동)
+2. Vercel 대시보드에서 환경변수 설정:
+   - `FIREBASE_API_KEY`
+   - `FIREBASE_AUTH_DOMAIN` 
+   - `FIREBASE_DATABASE_URL`
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_STORAGE_BUCKET`
+   - `FIREBASE_MESSAGING_SENDER_ID`
+   - `FIREBASE_APP_ID`
 
-### 환경변수 설정 (선택사항)
-고급 기능(Firebase, Supabase)을 사용하려면 Vercel 대시보드에서 환경변수를 설정하세요:
-- `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, 등
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+### 수동 배포
+```bash
+npm run build
+```
 
-## 저장소 옵션
+## 사용 방법
 
-### 1. 로컬 저장소 (기본값)
-- 브라우저 로컬 스토리지에 데이터 저장
-- 별도 설정 불필요
-- 가장 빠르고 간단
-
-### 2. Firebase Realtime Database
-- 실시간 클라우드 데이터베이스
-- 여러 기기 간 동기화 지원
-- Firebase 프로젝트 설정 필요
-
-### 3. Google Sheets
-- Google 스프레드시트에 데이터 저장
-- 스프레드시트로 직접 데이터 관리 가능
-- Google Cloud Console 설정 필요
+1. **로그인**: Google 계정으로 로그인
+2. **바로가기 추가**: 즐겨 사용하는 웹사이트 추가
+3. **카테고리 관리**: 바로가기를 카테고리별로 정리
+4. **구독 관리**: 결제일과 금액을 설정하여 구독 서비스 추적
+5. **실시간 동기화**: 모든 기기에서 동일한 데이터 확인
 
 ## 기술 스택
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS
 - **Build Tool**: Vite
-- **Backend**: Firebase Realtime Database (선택사항)
-- **Storage**: 로컬 스토리지, Firebase, Google Sheets API
-- **Deployment**: Vercel
+- **Database**: Firebase Realtime Database
+- **Authentication**: Firebase Auth (Google)
+- **Hosting**: Vercel
+- **State Management**: React Hooks
+
+## 프로젝트 구조
+
+```
+src/
+├── components/           # React 컴포넌트
+├── hooks/               # 커스텀 훅 (Firebase 연동)
+├── lib/                 # Firebase 설정
+├── src/
+│   ├── translations/    # 다국어 번역 파일
+│   └── types/          # TypeScript 타입 정의
+├── context/            # React Context (언어 설정)
+└── types.ts            # 공통 타입 정의
+```
 
 ## 라이선스
 

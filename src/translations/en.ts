@@ -62,26 +62,21 @@ export default {
     "label": "Language"
   },
   "syncStatus": {
-    "local": "Local Storage",
-    "localTooltip": "Data is stored only on this device.",
-    "googleSheets": "Google Sheets",
-    "syncedTooltip": "Data is synced with Google Sheets.",
     "firebase": "Firebase",
-    "firebaseTooltip": "Data is synced with Firebase Realtime Database."
+    "firebaseTooltip": "Data is synced with Firebase Realtime Database.",
+    "signedIn": "Signed In",
+    "signedOut": "Signed Out"
   },
   "configModal": {
     "connect": "Connect Sync",
     "copy": "Copy",
     "copied": "Copied!"
   },
-  "storageMode": {
-    "title": "Choose Storage Mode",
-    "local": "Local Storage",
-    "localDescription": "Data is stored only on this device. Simplest and fastest option.",
-    "firebase": "Firebase Realtime DB",
-    "firebaseDescription": "Real-time cloud database with sync across multiple devices.",
-    "googleSheets": "Google Sheets",
-    "googleSheetsDescription": "Store data in Google Sheets. Manage data directly in spreadsheets."
+  "auth": {
+    "signInTitle": "Sign in to get started",
+    "signInDescription": "Sign in with your Google account to sync your shortcuts across all devices.",
+    "signInButton": "Sign in with Google",
+    "signOutButton": "Sign out"
   },
   "common": {
     "cancel": "Cancel",

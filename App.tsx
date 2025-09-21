@@ -1,77 +1,58 @@
 import React, { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
 import EditShortcutModal from './components/EditShortcutModal';
 import CategoryManagerModal from './components/CategoryManagerModal';
-import type { Shortcut, Category } from './types';
-import { useLanguage } from './context/LanguageContext';
+import useFirebaseStorage from './hooks/useFirebaseStorage';
+import type { Shortcut } from './types';
 
 const App: React.FC = () => {
-  // Sample data for testing
-  const [shortcuts, setShortcuts] = useState<Shortcut[]>([
-    {
-      id: '1',
-      name: 'Netflix',
-      url: 'https://netflix.com',
-      categoryId: 'entertainment',
-      paymentAmount: 15.99,
-      paymentDate: '2024-01-15',
-      paymentFrequency: 'monthly'
-    },
-    {
-      id: '2', 
-      name: 'GitHub',
-      url: 'https://github.com',
-      categoryId: 'dev'
-    }
-  ]);
+  const {
+    shortcuts,
+    categories,
+    isLoading,
+    isSignedIn,
+    user,
+    signIn,
+    signOut,
+    addShortcut,
+    updateShortcut,
+    deleteShortcut,
+    addCategory,
+    updateCategory,
+    deleteCategory
+  } = useFirebaseStorage();
 
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 'entertainment', name: 'Entertainment' },
-    { id: 'dev', name: 'Development' },
-    { id: 'work', name: 'Work' }
-  ]);
-  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null);
 
-  const { t } = useLanguage();
-
-  const handleAddShortcut = (newShortcut: Omit<Shortcut, 'id'>) => {
-    const shortcutWithId: Shortcut = { ...newShortcut, id: crypto.randomUUID() };
-    setShortcuts(prevShortcuts => [...prevShortcuts, shortcutWithId]);
+  const handleAddShortcut = async (shortcutData: Omit<Shortcut, 'id'>) => {
+    await addShortcut(shortcutData);
     setIsAddModalOpen(false);
   };
 
-  const handleUpdateShortcut = (updatedShortcut: Shortcut) => {
-    setShortcuts(shortcuts.map(s => s.id === updatedShortcut.id ? updatedShortcut : s));
+  const handleUpdateShortcut = async (shortcut: Shortcut) => {
+    await updateShortcut(shortcut);
     setEditingShortcut(null);
   };
 
-  const handleDeleteShortcut = (id: string) => {
-    setShortcuts(shortcuts.filter(shortcut => shortcut.id !== id));
-  };
-  
-  const handleAddCategory = (name: string) => {
-    const newCategory: Category = { id: crypto.randomUUID(), name };
-    setCategories(prev => [...prev, newCategory]);
+  const handleDeleteShortcut = async (id: string) => {
+    await deleteShortcut(id);
   };
 
-  const handleUpdateCategory = (id: string, name: string) => {
-    setCategories(prev => prev.map(cat => (cat.id === id ? { ...cat, name } : cat)));
+  const handleAddCategory = async (name: string) => {
+    await addCategory({ name });
   };
 
-  const handleDeleteCategory = (id: string) => {
-    setCategories(prev => prev.filter(cat => cat.id !== id));
-    // Uncategorize shortcuts that belonged to the deleted category
-    setShortcuts(prev => prev.map(sc => {
-      if (sc.categoryId === id) {
-        return { ...sc, categoryId: undefined };
-      }
-      return sc;
-    }));
+  const handleUpdateCategory = async (id: string, name: string) => {
+    await updateCategory({ id, name });
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    await deleteCategory(id);
   };
 
   return (
@@ -80,35 +61,31 @@ const App: React.FC = () => {
         onAddClick={() => setIsAddModalOpen(true)} 
         onManageCategoriesClick={() => setIsCategoryModalOpen(true)}
         shortcuts={shortcuts}
-        isSignedIn={true}
-        onSignIn={() => {}}
-        onSignOut={() => {}}
-        canManageData={true}
-        isConfigured={true}
-        onConfigureClick={() => {}}
-        storageMode="local"
-        onStorageModeClick={() => {}}
+        isSignedIn={isSignedIn}
+        onSignIn={signIn}
+        onSignOut={signOut}
+        user={user}
       />
-      <main className="max-w-7xl mx-auto px-4">
-        <div className="py-8">
-          <h2 className="text-2xl font-bold mb-6">{t('shortcutGrid.uncategorized')}</h2>
-          <ShortcutGrid 
-            shortcuts={shortcuts} 
-            categories={categories}
-            onDelete={handleDeleteShortcut}
-            onEdit={(shortcut) => setEditingShortcut(shortcut)}
-            isSignedIn={true}
-            isLoading={false}
-            isConfigured={true}
-          />
-        </div>
+      
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <ShortcutGrid 
+          shortcuts={shortcuts} 
+          categories={categories}
+          onDelete={handleDeleteShortcut}
+          onEdit={(shortcut) => setEditingShortcut(shortcut)}
+          isSignedIn={isSignedIn}
+          isLoading={isLoading}
+        />
       </main>
+
+      {/* Modals */}
       <AddShortcutModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddShortcut}
         categories={categories}
       />
+
       <EditShortcutModal
         isOpen={!!editingShortcut}
         onClose={() => setEditingShortcut(null)}
@@ -116,6 +93,7 @@ const App: React.FC = () => {
         shortcut={editingShortcut}
         categories={categories}
       />
+
       <CategoryManagerModal 
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
@@ -123,6 +101,32 @@ const App: React.FC = () => {
         onAddCategory={handleAddCategory}
         onUpdateCategory={handleUpdateCategory}
         onDeleteCategory={handleDeleteCategory}
+      />
+
+      {/* Toast Notifications */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
       />
     </div>
   );

@@ -62,26 +62,21 @@ export default {
     "label": "언어"
   },
   "syncStatus": {
-    "local": "로컬 저장소",
-    "localTooltip": "데이터가 이 기기에만 저장됩니다.",
-    "googleSheets": "Google Sheets",
-    "syncedTooltip": "데이터가 Google Sheets와 동기화됩니다.",
     "firebase": "Firebase",
-    "firebaseTooltip": "실시간 클라우드 데이터베이스와 동기화됩니다."
+    "firebaseTooltip": "실시간 클라우드 데이터베이스와 동기화됩니다.",
+    "signedIn": "로그인됨",
+    "signedOut": "로그아웃됨"
   },
   "configModal": {
     "connect": "동기화 연결",
     "copy": "복사",
     "copied": "복사됨!"
   },
-  "storageMode": {
-    "title": "저장 방식 선택",
-    "local": "로컬 저장소",
-    "localDescription": "데이터가 이 기기에만 저장됩니다. 가장 간단하고 빠른 방법입니다.",
-    "firebase": "Firebase 실시간 DB",
-    "firebaseDescription": "실시간 동기화가 가능한 클라우드 데이터베이스입니다. 여러 기기에서 사용 가능합니다.",
-    "googleSheets": "Google Sheets",
-    "googleSheetsDescription": "Google Sheets에 데이터를 저장합니다. 스프레드시트로 데이터를 관리할 수 있습니다."
+  "auth": {
+    "signInTitle": "로그인하여 시작하세요",
+    "signInDescription": "Google 계정으로 로그인하면 모든 기기에서 바로가기를 동기화할 수 있습니다.",
+    "signInButton": "Google로 로그인",
+    "signOutButton": "로그아웃"
   },
   "common": {
     "cancel": "취소",

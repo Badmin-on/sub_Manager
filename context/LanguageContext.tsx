@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import useLocalStorage from '../hooks/useLocalStorage';
 import type { Locale, TranslationData, LanguageContextType, AllTranslationKeys } from '../src/types/translations';
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -36,8 +35,32 @@ const getEmergencyFallback = (key: string): string => {
   return emergencyTranslations[key] || key;
 };
 
+// Simple localStorage hook implementation
+const useSimpleLocalStorage = <T,>(key: string, defaultValue: T): [T, (value: T) => void] => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+      console.warn(`Error reading localStorage key "${key}":`, error);
+      return defaultValue;
+    }
+  });
+
+  const setValue = useCallback((value: T) => {
+    try {
+      setStoredValue(value);
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.warn(`Error setting localStorage key "${key}":`, error);
+    }
+  }, [key]);
+
+  return [storedValue, setValue];
+};
+
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useLocalStorage<Locale>('language', 'ko');
+  const [locale, setLocale] = useSimpleLocalStorage<Locale>('language', 'ko');
   const [translations, setTranslations] = useState<TranslationData | null>(null);
   const [fallbackTranslations, setFallbackTranslations] = useState<TranslationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
