@@ -30,7 +30,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         
         // Try to fetch JSON first, fallback to hardcoded translations if fails
         try {
-          const currentLangResponse = await fetch(`/locales/${locale}.json`);
+          // Add cache busting with timestamp
+          const cacheBuster = new Date().getTime();
+          const currentLangResponse = await fetch(`/locales/${locale}.json?v=${cacheBuster}`);
           console.log(`Response status for ${locale}.json:`, currentLangResponse.status);
           
           if (currentLangResponse.ok) {
@@ -40,7 +42,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
             if (locale !== 'en') {
               try {
-                const fallbackLangResponse = await fetch(`/locales/en.json`);
+                const fallbackLangResponse = await fetch(`/locales/en.json?v=${cacheBuster}`);
                 if (fallbackLangResponse.ok) {
                   const fallbackLangData = await fallbackLangResponse.json();
                   setFallbackTranslations(fallbackLangData);
