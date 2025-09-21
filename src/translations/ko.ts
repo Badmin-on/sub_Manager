@@ -1,0 +1,95 @@
+export default {
+  "header": {
+    "title": "내 바로가기",
+    "totalThisMonth": "이번 달 총액",
+    "manageCategories": "카테고리 관리",
+    "addSite": "사이트 추가",
+    "signIn": "Google 계정으로 로그인",
+    "signOut": "로그아웃"
+  },
+  "shortcutGrid": {
+    "noShortcuts": "바로가기가 아직 없습니다",
+    "getStarted": "새 사이트를 추가하여 시작하세요.",
+    "uncategorized": "미분류",
+    "signInPrompt": "로그인 해주세요",
+    "signInToSync": "Google 계정으로 로그인하여 바로가기를 동기화하세요.",
+    "loading": "바로가기를 불러오는 중...",
+    "localModeTitle": "시작할 준비가 되셨나요?",
+    "localModeMessage": "바로가기를 추가하여 시작하세요. 데이터는 이 기기에 로컬로 저장됩니다."
+  },
+  "shortcutItem": {
+    "edit": "{name} 수정",
+    "delete": "{name} 삭제",
+    "paymentDue": "결제일 임박!"
+  },
+  "addModal": {
+    "title": "새 사이트 추가",
+    "siteName": "사이트 이름",
+    "siteNamePlaceholder": "예: 넷플릭스",
+    "siteUrl": "사이트 URL",
+    "siteUrlPlaceholder": "예: netflix.com",
+    "categoryLabel": "카테고리 (선택 사항)",
+    "uncategorized": "미분류",
+    "paymentDateLabel": "다음 결제일 (선택 사항)",
+    "paymentDateHelp": "이 사이트를 구독으로 표시하려면 날짜를 선택하세요.",
+    "paymentAmountLabel": "결제 금액 (USD)",
+    "paymentAmountPlaceholder": "예: 15.99",
+    "paymentFrequencyLabel": "결제 주기",
+    "monthly": "매월",
+    "yearly": "매년",
+    "errorRequired": "사이트 이름과 URL은 필수입니다.",
+    "errorInvalidUrl": "유효한 URL을 입력하세요.",
+    "cancel": "취소",
+    "save": "저장"
+  },
+  "editModal": {
+    "title": "사이트 수정",
+    "update": "업데이트"
+  },
+  "categoryModal": {
+    "title": "카테고리 관리",
+    "noCategories": "카테고리가 아직 없습니다.",
+    "addNew": "새 카테고리 추가",
+    "addNewPlaceholder": "예: 업무",
+    "add": "추가",
+    "save": "저장",
+    "cancel": "취소",
+    "edit": "{name} 수정",
+    "delete": "{name} 삭제",
+    "deleteConfirm": "이 카테고리를 정말 삭제하시겠습니까? 포함된 바로가기는 미분류 상태가 됩니다."
+  },
+  "languageSwitcher": {
+    "label": "언어"
+  },
+  "syncStatus": {
+    "local": "로컬 저장소",
+    "localTooltip": "데이터가 이 기기에만 저장됩니다.",
+    "googleSheets": "Google Sheets",
+    "syncedTooltip": "데이터가 Google Sheets와 동기화됩니다.",
+    "firebase": "Firebase",
+    "firebaseTooltip": "실시간 클라우드 데이터베이스와 동기화됩니다."
+  },
+  "configModal": {
+    "connect": "동기화 연결",
+    "copy": "복사",
+    "copied": "복사됨!"
+  },
+  "storageMode": {
+    "title": "저장 방식 선택",
+    "local": "로컬 저장소",
+    "localDescription": "데이터가 이 기기에만 저장됩니다. 가장 간단하고 빠른 방법입니다.",
+    "firebase": "Firebase 실시간 DB",
+    "firebaseDescription": "실시간 동기화가 가능한 클라우드 데이터베이스입니다. 여러 기기에서 사용 가능합니다.",
+    "googleSheets": "Google Sheets",
+    "googleSheetsDescription": "Google Sheets에 데이터를 저장합니다. 스프레드시트로 데이터를 관리할 수 있습니다."
+  },
+  "common": {
+    "cancel": "취소",
+    "save": "저장",
+    "confirm": "확인",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "success": "성공"
+  }
+} as const;
