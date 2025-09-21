@@ -12,6 +12,21 @@ dist
 dist-ssr
 *.local
 
+# PM2
+.pm2
+ecosystem.config.js
+
+# Supervisor
+supervisord.conf
+supervisord.pid
+supervisord.log
+webserver.log
+webserver_error.log
+supervisor.sock
+
+# Development servers
+web_server.py
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
