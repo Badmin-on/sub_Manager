@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "express": "^5.1.0",
     "firebase": "^12.3.0",
     "pm2": "^6.0.11",
     "react": "^19.1.1",

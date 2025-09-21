@@ -23,7 +23,14 @@ export default defineConfig(({ mode }) => {
         sourcemap: false,
         rollupOptions: {
           output: {
-            manualChunks: undefined,
+            manualChunks: (id) => {
+              if (id.includes('/translations/')) {
+                return 'translations';
+              }
+              if (id.includes('node_modules')) {
+                return 'vendor';
+              }
+            },
           }
         }
       },
