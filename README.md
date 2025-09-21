@@ -93,3 +93,4 @@ Google Sheets를 사용하려면:
 ## 라이선스
 
 MIT License
+# Translation System Fixed
