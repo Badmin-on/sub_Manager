@@ -1,0 +1,6 @@
+# Vercel ignore file - force clean deployment
+node_modules
+.git
+.env.local
+.env.*.local
+dist-old
